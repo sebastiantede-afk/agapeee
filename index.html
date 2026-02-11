@@ -3,388 +3,358 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
-    <!-- Meta etiquetas para PWA e Instalación -->
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="BilleteraPro">
-    <meta name="theme-color" content="#050a14">
-    
-    <!-- Icono para iPhone y Android -->
+    <meta name="apple-mobile-web-app-title" content="Billetera Pro">
     <link rel="apple-touch-icon" href="img.jpg">
     <link rel="icon" type="image/jpeg" href="img.jpg">
-    
-    <!-- Vínculo al Manifest -->
+    <meta name="theme-color" content="#020617">
     <link rel="manifest" href="manifest.json">
-    
-    <title>Billetera Pro</title>
+
+    <title>Billetera Pro - Full Navy</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
-        
-        :root {
-            --navy-dark: #050a14;
-            --gold: #fbbf24;
-        }
-
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--navy-dark);
-            color: #ffffff;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-            overflow: hidden;
-            height: 100vh;
-            width: 100vw;
-            margin: 0;
-        }
-
-        .glass { 
-            background: rgba(10, 25, 47, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .view { 
-            display: none; 
-            height: 100vh; 
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-        .view.active { display: flex; flex-direction: column; }
-
-        .content-scroll {
-            flex: 1;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            padding-bottom: 120px;
-        }
-
-        .input-premium {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 18px;
-        }
-
-        .nav-item.active { color: var(--gold); transform: translateY(-2px); }
-        .nav-item { transition: all 0.2s ease; }
-
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        :root { --navy-dark: #020617; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--navy-dark); color: #f1f5f9; user-select: none; -webkit-tap-highlight-color: transparent; }
+        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .view { display: none; }
+        .view.active { display: block; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 500px; height: 70px; border-radius: 35px; z-index: 100; }
+        input, select, textarea { background: rgba(15, 23, 42, 0.8) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: white !important; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body>
+<body class="pb-32">
 
-    <!-- Navegación Inferior -->
-    <nav class="fixed bottom-0 left-0 right-0 z-50 glass border-t border-white/5 px-6 pt-3 pb-8 flex justify-around items-center rounded-t-[2.5rem]">
-        <button onclick="switchView('pos-view')" class="nav-item flex flex-col items-center gap-1 opacity-40" id="nav-pos">
-            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-            <span class="text-[9px] font-bold uppercase">Ventas</span>
-        </button>
-        <button onclick="switchView('stats-view')" class="nav-item flex flex-col items-center gap-1 opacity-40" id="nav-stats">
-            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-            <span class="text-[9px] font-bold uppercase">Stats</span>
-        </button>
-        <button onclick="switchView('cash-view')" class="nav-item flex flex-col items-center gap-1 opacity-40" id="nav-cash">
-            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            <span class="text-[9px] font-bold uppercase">Caja</span>
-        </button>
-        <button onclick="openModal('inventory-modal')" class="nav-item flex flex-col items-center gap-1 opacity-40">
-            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
-            <span class="text-[9px] font-bold uppercase">Menu</span>
+    <!-- Header -->
+    <nav class="glass sticky top-0 z-50 p-6 flex justify-between items-center rounded-b-[2.5rem]">
+        <div class="flex items-center gap-3">
+            <img src="img.jpg" class="w-12 h-12 rounded-2xl object-cover border border-white/10" onerror="this.src='https://via.placeholder.com/48'">
+            <div>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Capital Total</p>
+                <h1 id="main-balance" class="text-2xl font-extrabold text-white">$ 0</h1>
+            </div>
+        </div>
+        <button onclick="openModal('inventory-modal')" class="bg-cyan-500 text-slate-900 w-10 h-10 rounded-full flex items-center justify-center shadow-lg shadow-cyan-500/20 active:scale-90 transition-transform">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" /></svg>
         </button>
     </nav>
 
-    <!-- Header Fijo -->
-    <header class="glass sticky top-0 z-40 border-b border-white/5 px-6 py-4 pt-12">
-        <div class="flex justify-between items-center">
-            <div>
-                <p class="text-[9px] font-black text-amber-500 uppercase tracking-widest opacity-60">Balance Total</p>
-                <h1 id="main-balance" class="text-3xl font-light tracking-tighter">$ 0</h1>
-            </div>
-            <div class="bg-amber-500/10 p-2 rounded-2xl border border-amber-500/20">
-                <span class="text-amber-500 text-[10px] font-black">PREMIUM</span>
-            </div>
-        </div>
-    </header>
-
-    <!-- VISTA POS -->
+    <!-- VISTA 1: POS -->
     <div id="pos-view" class="view active">
-        <div class="content-scroll p-6 space-y-6">
+        <main class="p-5 space-y-6">
             <div id="pos-grid" class="grid grid-cols-2 gap-3"></div>
-            
-            <div class="glass rounded-[2.5rem] p-6 space-y-4">
-                <div id="cart-items" class="space-y-2"></div>
-                <div class="pt-4 border-t border-white/5 flex justify-between items-baseline">
-                    <span class="text-xs font-bold text-gray-500 uppercase">Total</span>
-                    <span id="cart-total" class="text-3xl font-light">$ 0</span>
+
+            <section class="glass rounded-[2.5rem] p-7 space-y-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="font-bold text-white">Venta Actual</h2>
+                    <button onclick="clearCart()" class="text-[10px] text-rose-400 font-bold bg-rose-500/10 px-3 py-1.5 rounded-full uppercase">Limpiar</button>
                 </div>
-                <button onclick="confirmSale()" class="w-full py-4 bg-white text-black rounded-2xl font-black text-[10px] uppercase tracking-widest">Registrar Venta</button>
-            </div>
-            
-            <div id="history-log" class="space-y-2"></div>
-        </div>
+                
+                <div id="cart-items" class="space-y-2 max-h-40 overflow-y-auto no-scrollbar text-sm"></div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="p-3 rounded-2xl bg-slate-900/50">
+                        <label class="text-[9px] text-slate-500 uppercase font-bold block mb-1">Descuento %</label>
+                        <input type="number" id="cart-discount" oninput="render(); calculateChange();" placeholder="0" class="w-full bg-transparent outline-none font-bold text-cyan-400 text-sm">
+                    </div>
+                    <div class="p-3 rounded-2xl bg-slate-900/50">
+                        <label class="text-[9px] text-slate-500 uppercase font-bold block mb-1">Paga con $</label>
+                        <input type="number" id="payment-received" oninput="calculateChange()" placeholder="0" class="w-full bg-transparent outline-none font-bold text-white text-sm">
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-end pt-2">
+                    <div>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Total</p>
+                        <span id="cart-total" class="text-4xl font-black text-white tracking-tighter">$ 0</span>
+                    </div>
+                    <div id="payment-change" class="text-emerald-400 font-bold text-sm mb-1">Vuelto: $0</div>
+                </div>
+                
+                <button onclick="confirmSale()" class="w-full py-5 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-[1.5rem] font-bold shadow-lg active:scale-95 transition-transform">FINALIZAR COBRO</button>
+            </section>
+
+            <section class="pb-10">
+                <h2 class="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-4">Movimientos</h2>
+                <div id="history-log" class="space-y-3"></div>
+            </section>
+        </main>
     </div>
 
-    <!-- VISTA STATS -->
-    <div id="stats-view" class="view">
-        <div class="content-scroll p-6 space-y-6">
-            <h2 class="text-center font-light text-2xl">Rendimiento</h2>
-            <div class="glass p-6 rounded-[2.5rem]">
-                <canvas id="mainChart"></canvas>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-                <div class="glass p-4 rounded-3xl text-center">
-                    <p class="text-[8px] font-black uppercase opacity-40">Ingresos</p>
-                    <p id="stats-inc" class="text-xl font-light text-emerald-400">$ 0</p>
-                </div>
-                <div class="glass p-4 rounded-3xl text-center">
-                    <p class="text-[8px] font-black uppercase opacity-40">Egresos</p>
-                    <p id="stats-exp" class="text-xl font-light text-rose-400">$ 0</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- VISTA CAJA -->
+    <!-- VISTA 2: CAJA -->
     <div id="cash-view" class="view">
-        <div class="content-scroll p-6">
-            <div class="glass p-8 rounded-[3rem] space-y-6">
-                <p class="text-center text-[10px] font-black text-gray-500 uppercase tracking-widest">Movimiento Manual</p>
-                <input type="number" id="cash-amount" class="w-full bg-transparent text-5xl font-light text-center outline-none" placeholder="0">
-                <input type="text" id="cash-obs" class="w-full input-premium p-4 text-center text-sm" placeholder="Concepto o referencia...">
-                <button onclick="registerCashMovement()" class="w-full py-5 bg-amber-500 text-black rounded-2xl font-black text-[10px] uppercase tracking-widest">Confirmar</button>
-                <p class="text-[8px] text-center text-gray-600">Usa números negativos (-) para registrar gastos.</p>
+        <main class="p-6 space-y-6">
+            <div class="glass rounded-[2.5rem] p-8 space-y-6">
+                <div class="flex p-1.5 bg-slate-900 rounded-2xl">
+                    <button id="type-income" onclick="setCashType('income')" class="flex-1 py-3 rounded-xl font-bold text-[11px] uppercase bg-blue-600 text-white">Ingreso</button>
+                    <button id="type-expense" onclick="setCashType('expense')" class="flex-1 py-3 rounded-xl font-bold text-[11px] uppercase text-slate-500">Egreso</button>
+                </div>
+
+                <input type="number" id="cash-amount" oninput="renderInstallmentCalc()" class="w-full p-6 rounded-2xl text-4xl font-black text-center" placeholder="0.00">
+                <textarea id="cash-obs" rows="2" class="w-full p-4 rounded-2xl text-sm" placeholder="Descripción..."></textarea>
+
+                <div id="expense-options" class="hidden space-y-4">
+                    <div class="flex gap-2">
+                        <button id="method-cash" onclick="setCashMethod('cash')" class="flex-1 py-3 rounded-xl font-bold text-[10px] uppercase bg-slate-800 text-cyan-400 border border-cyan-400/20">Efectivo</button>
+                        <button id="method-card" onclick="setCashMethod('card')" class="flex-1 py-3 rounded-xl font-bold text-[10px] uppercase text-slate-500">Tarjeta</button>
+                    </div>
+                    <div id="card-fields" class="hidden">
+                        <select id="installments" onchange="renderInstallmentCalc()" class="w-full p-4 rounded-xl mb-2"></select>
+                        <p id="installment-info" class="text-center text-xs text-cyan-400 font-bold"></p>
+                    </div>
+                </div>
+
+                <button onclick="registerCashMovement()" class="w-full py-5 bg-white text-slate-900 rounded-[1.5rem] font-black active:scale-95 uppercase tracking-widest text-xs">Registrar Movimiento</button>
             </div>
-        </div>
+        </main>
+    </div>
+
+    <!-- VISTA 3: AGENDA -->
+    <div id="fixed-view" class="view">
+        <main class="p-6 space-y-6">
+            <h2 class="text-2xl font-black text-white px-2">Agenda de Pagos</h2>
+            <div id="fixed-list" class="space-y-4"></div>
+        </main>
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="tab-bar glass flex justify-around items-center border-t border-white/10">
+        <button onclick="switchView('pos-view')" id="tab-pos" class="flex flex-col items-center gap-1 text-cyan-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" stroke-width="2" /></svg>
+            <span class="text-[8px] font-bold uppercase">POS</span>
+        </button>
+        <button onclick="switchView('cash-view')" id="tab-cash" class="flex flex-col items-center gap-1 text-slate-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2" /></svg>
+            <span class="text-[8px] font-bold uppercase">Caja</span>
+        </button>
+        <button onclick="switchView('fixed-view')" id="tab-fixed" class="flex flex-col items-center gap-1 text-slate-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="2" /></svg>
+            <span class="text-[8px] font-bold uppercase">Agenda</span>
+        </button>
     </div>
 
     <!-- Modal Catálogo -->
-    <div id="inventory-modal" class="modal-overlay fixed inset-0 z-[60] hidden items-end">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeModal('inventory-modal')"></div>
-        <div class="relative w-full glass rounded-t-[3rem] p-8 pb-20">
-            <div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-8"></div>
-            <div class="space-y-4">
-                <p class="font-black text-xs uppercase tracking-[0.2em] mb-2 text-amber-500">Nuevo Producto</p>
-                <div class="flex gap-2">
-                    <input type="text" id="new-name" placeholder="Nombre" class="flex-1 input-premium p-4 outline-none">
-                    <input type="number" id="new-price" placeholder="$" class="w-24 input-premium p-4 text-center font-bold outline-none">
-                </div>
-                <button onclick="addProduct()" class="w-full py-4 bg-white text-black rounded-xl font-black text-[10px] uppercase tracking-widest">Guardar en Catálogo</button>
+    <div id="inventory-modal" class="fixed inset-0 z-[120] bg-black/80 flex items-end justify-center hidden opacity-0 transition-opacity [&.active]:flex [&.active]:opacity-100">
+        <div class="glass w-full max-w-md rounded-t-[3rem] p-8 space-y-4 max-h-[85vh] overflow-y-auto no-scrollbar">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-white text-xl">Catálogo</h3>
+                <button onclick="closeModal('inventory-modal')" class="text-slate-500 text-xl">✕</button>
             </div>
-            <div id="full-inventory" class="mt-10 space-y-3 max-h-48 overflow-y-auto no-scrollbar"></div>
+            <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="new-name" placeholder="Nombre" class="p-4 rounded-xl text-sm">
+                <input type="number" id="new-price" placeholder="Precio" class="p-4 rounded-xl text-sm font-bold">
+            </div>
+            <button onclick="addProduct()" class="w-full py-4 bg-cyan-500 text-slate-900 rounded-2xl font-black uppercase text-[10px]">Guardar Producto</button>
+            <div id="full-inventory" class="space-y-2 pt-4"></div>
         </div>
     </div>
 
     <script>
-        /**
-         * FIX: Manejo preventivo del registro del Service Worker.
-         * Se verifica que el entorno no sea una URL 'blob' antes de intentar el registro,
-         * evitando así errores de protocolo en la consola del editor.
-         */
-        if ('serviceWorker' in navigator && window.location.protocol !== 'blob:') {
-            window.addEventListener('load', () => {
-                const swCode = `
-                    self.addEventListener('install', (e) => self.skipWaiting());
-                    self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
-                    self.addEventListener('fetch', (e) => e.respondWith(fetch(e.request)));
-                `;
-                
-                try {
-                    const blob = new Blob([swCode], { type: 'application/javascript' });
-                    const swUrl = URL.createObjectURL(blob);
-                    
-                    navigator.serviceWorker.register(swUrl)
-                        .then(() => console.log('PWA: Modo Offline preparado'))
-                        .catch(() => { /* Silenciar error en entornos restringidos */ });
-                } catch (e) {
-                    console.warn('PWA: Entorno incompatible con Service Workers dinámicos.');
-                }
-            });
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); });
         }
 
-        let state = {
+        let state = JSON.parse(localStorage.getItem('billetera_full_data')) || {
             balance: 0,
-            products: [{ id: 1, name: 'Café Espresso', price: 1500 }, { id: 2, name: 'Medialuna', price: 900 }],
-            cart: [],
-            history: []
+            products: [{id: 1, name: 'Ejemplo', price: 1000}],
+            history: [],
+            fixed: [],
+            cashType: 'income',
+            cashMethod: 'cash'
         };
 
-        const KEY = 'billetera_final_v1';
-        function save() { localStorage.setItem(KEY, JSON.stringify(state)); }
-        function load() {
-            const data = localStorage.getItem(KEY);
-            if(data) state = JSON.parse(data);
+        let cart = [];
+
+        function save() {
+            localStorage.setItem('billetera_full_data', JSON.stringify(state));
             render();
-            updateNavUI('pos-view');
         }
 
         function switchView(id) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            updateNavUI(id);
-            if(id === 'stats-view') renderCharts();
-            window.scrollTo(0,0);
+            ['pos', 'cash', 'fixed'].forEach(t => {
+                const el = document.getElementById(`tab-${t}`);
+                el.classList.toggle('text-cyan-400', `view-${t}` === id.replace('-view', ''));
+                el.classList.toggle('text-slate-400', `view-${t}` !== id.replace('-view', ''));
+            });
         }
 
-        function updateNavUI(id) {
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            const map = {'pos-view':'nav-pos', 'stats-view':'nav-stats', 'cash-view':'nav-cash'};
-            if(map[id]) document.getElementById(map[id]).classList.add('active');
-        }
-
+        // --- POS Logic ---
         function addToCart(id) {
             const p = state.products.find(x => x.id === id);
-            const inCart = state.cart.find(x => x.id === id);
-            if(inCart) inCart.qty++; else state.cart.push({...p, qty: 1});
+            const inCart = cart.find(x => x.id === id);
+            if(inCart) inCart.qty++; else cart.push({...p, qty: 1});
             render();
         }
 
+        function getCartTotal() {
+            const sub = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+            const disc = parseFloat(document.getElementById('cart-discount').value) || 0;
+            return sub - (sub * (disc/100));
+        }
+
+        function calculateChange() {
+            const total = getCartTotal();
+            const pay = parseFloat(document.getElementById('payment-received').value) || 0;
+            document.getElementById('payment-change').innerText = pay >= total && total > 0 ? `Vuelto: $ ${(pay - total).toLocaleString()}` : `Vuelto: $ 0`;
+        }
+
         function confirmSale() {
-            const total = state.cart.reduce((s,i) => s + (i.price*i.qty), 0);
-            if(total === 0) return;
-            state.balance += total;
-            state.history.push({ 
-                date: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), 
-                amount: total, 
-                type:'income', 
-                desc: state.cart.map(c => `${c.qty}x ${c.name}`).join(', ') 
-            });
-            state.cart = [];
-            save(); render();
+            const t = getCartTotal();
+            if(t <= 0) return;
+            state.balance += t;
+            state.history.push({ date: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), amount: t, desc: `Venta: ${cart.map(c => c.name).join(', ')}` });
+            clearCart();
+            save();
+        }
+
+        function clearCart() {
+            cart = [];
+            document.getElementById('payment-received').value = '';
+            document.getElementById('cart-discount').value = '';
+            render();
+        }
+
+        // --- CAJA Logic ---
+        function setCashType(t) {
+            state.cashType = t;
+            document.getElementById('type-income').className = t === 'income' ? "flex-1 py-3 rounded-xl font-bold text-[11px] uppercase bg-blue-600 text-white" : "flex-1 py-3 rounded-xl font-bold text-[11px] uppercase text-slate-500";
+            document.getElementById('type-expense').className = t === 'expense' ? "flex-1 py-3 rounded-xl font-bold text-[11px] uppercase bg-rose-600 text-white" : "flex-1 py-3 rounded-xl font-bold text-[11px] uppercase text-slate-500";
+            document.getElementById('expense-options').classList.toggle('hidden', t === 'income');
+        }
+
+        function setCashMethod(m) {
+            state.cashMethod = m;
+            document.getElementById('method-cash').className = m === 'cash' ? "flex-1 py-3 rounded-xl font-bold text-[10px] uppercase bg-slate-800 text-cyan-400 border border-cyan-400/20" : "flex-1 py-3 rounded-xl font-bold text-[10px] uppercase text-slate-500";
+            document.getElementById('method-card').className = m === 'card' ? "flex-1 py-3 rounded-xl font-bold text-[10px] uppercase bg-slate-800 text-cyan-400 border border-cyan-400/20" : "flex-1 py-3 rounded-xl font-bold text-[10px] uppercase text-slate-500";
+            document.getElementById('card-fields').classList.toggle('hidden', m === 'cash');
+        }
+
+        function renderInstallmentCalc() {
+            const val = parseFloat(document.getElementById('cash-amount').value) || 0;
+            const ins = parseInt(document.getElementById('installments').value) || 1;
+            document.getElementById('installment-info').innerText = ins > 1 ? `${ins} cuotas de $ ${(val/ins).toLocaleString()}` : "";
         }
 
         function registerCashMovement() {
             const val = parseFloat(document.getElementById('cash-amount').value);
+            const obs = document.getElementById('cash-obs').value || 'Movimiento Manual';
             if(!val) return;
-            state.balance += val;
-            state.history.push({ 
-                date: new Date().toLocaleDateString([], {day:'2-digit', month:'2-digit'}), 
-                amount: val, 
-                type: val > 0 ? 'income' : 'expense', 
-                desc: document.getElementById('cash-obs').value || 'Movimiento Manual' 
-            });
+
+            if(state.cashType === 'income') {
+                state.balance += val;
+                state.history.push({ date: 'Manual', amount: val, desc: obs });
+            } else {
+                if(state.cashMethod === 'cash') {
+                    state.balance -= val;
+                    state.history.push({ date: 'Manual', amount: -val, desc: obs });
+                } else {
+                    const ins = parseInt(document.getElementById('installments').value);
+                    for(let i=0; i<ins; i++) {
+                        state.fixed.push({ id: Date.now()+i, name: `Cuota ${i+1}/${ins}: ${obs}`, amount: val/ins });
+                    }
+                    state.history.push({ date: 'Tarjeta', amount: 0, desc: `TC: ${obs} (${ins} cuotas)` });
+                }
+            }
             document.getElementById('cash-amount').value = '';
             document.getElementById('cash-obs').value = '';
-            save(); render(); switchView('pos-view');
+            save();
+            switchView('pos-view');
         }
 
-        let chart = null;
-        function renderCharts() {
-            const ctx = document.getElementById('mainChart');
-            if(!ctx) return;
-            const historySlice = state.history.slice(-10);
-            const data = historySlice.map(h => h.amount);
-            const labels = historySlice.map(h => h.date);
-            
-            if(chart) chart.destroy();
-            chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels,
-                    datasets: [{ 
-                        data, 
-                        borderColor: '#fbbf24', 
-                        tension: 0.4, 
-                        fill: true, 
-                        backgroundColor: 'rgba(251,191,36,0.05)',
-                        pointRadius: 4,
-                        pointBackgroundColor: '#fbbf24'
-                    }]
-                },
-                options: { 
-                    responsive: true,
-                    plugins: { legend: { display: false } }, 
-                    scales: { 
-                        y: { ticks: { color: 'rgba(255,255,255,0.3)', font: { size: 8 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, 
-                        x: { ticks: { color: 'rgba(255,255,255,0.3)', font: { size: 8 } }, grid: { display: false } } 
-                    } 
-                }
-            });
-            
-            const inc = state.history.filter(h => h.amount > 0).reduce((s,h) => s+h.amount,0);
-            const exp = state.history.filter(h => h.amount < 0).reduce((s,h) => s+Math.abs(h.amount),0);
-            document.getElementById('stats-inc').innerText = `$ ${inc.toLocaleString()}`;
-            document.getElementById('stats-exp').innerText = `$ ${exp.toLocaleString()}`;
+        function payFixed(id) {
+            const item = state.fixed.find(x => x.id === id);
+            state.balance -= item.amount;
+            state.history.push({ date: 'Agenda', amount: -item.amount, desc: `Pago: ${item.name}` });
+            state.fixed = state.fixed.filter(x => x.id !== id);
+            save();
         }
 
-        function render() {
-            const mainBal = document.getElementById('main-balance');
-            if(mainBal) mainBal.innerText = `$ ${state.balance.toLocaleString('es-AR')}`;
-            
-            const grid = document.getElementById('pos-grid');
-            if(grid) {
-                grid.innerHTML = state.products.map(p => `
-                    <button onclick="addToCart(${p.id})" class="glass p-5 rounded-[2rem] text-left active:scale-95 transition-transform border border-white/5">
-                        <p class="text-[8px] font-black opacity-30 uppercase tracking-widest truncate">${p.name}</p>
-                        <p class="text-xl font-light mt-1">$ ${p.price.toLocaleString()}</p>
-                    </button>
-                `).join('');
-            }
-            
-            const cartItems = document.getElementById('cart-items');
-            if(cartItems) {
-                cartItems.innerHTML = state.cart.length === 0 ? '<p class="text-center text-[10px] opacity-20 py-2">CARRITO VACÍO</p>' : 
-                    state.cart.map(i => `
-                        <div class="flex justify-between text-[11px] bg-white/5 p-2 rounded-lg">
-                            <span class="opacity-70">${i.qty}x ${i.name}</span>
-                            <span class="font-bold text-amber-500">$ ${(i.qty*i.price).toLocaleString()}</span>
-                        </div>
-                    `).join('');
-            }
-                
-            const cartTot = document.getElementById('cart-total');
-            if(cartTot) cartTot.innerText = `$ ${state.cart.reduce((s,i) => s+(i.price*i.qty), 0).toLocaleString()}`;
-
-            const histLog = document.getElementById('history-log');
-            if(histLog) {
-                histLog.innerHTML = state.history.slice(-3).reverse().map(h => `
-                    <div class="glass p-4 rounded-2xl flex justify-between items-center text-[10px] border border-white/5">
-                        <div class="flex flex-col">
-                            <span class="opacity-30 font-black text-[8px] uppercase">${h.date}</span>
-                            <span class="opacity-60 truncate max-w-[150px]">${h.desc}</span>
-                        </div>
-                        <span class="font-bold ${h.amount > 0 ? 'text-emerald-400' : 'text-rose-400'}">
-                            ${h.amount > 0 ? '+' : ''}$ ${h.amount.toLocaleString()}
-                        </span>
-                    </div>
-                `).join('');
-            }
-
-            const fullInv = document.getElementById('full-inventory');
-            if(fullInv) {
-                fullInv.innerHTML = state.products.map(p => `
-                    <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
-                        <span class="text-xs opacity-80">${p.name}</span>
-                        <div class="flex items-center gap-4">
-                            <span class="text-xs font-bold text-amber-500">$ ${p.price}</span>
-                            <button onclick="removeProduct(${p.id})" class="text-rose-500 text-[10px]">✕</button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-
+        // --- Catálogo Logic ---
         function addProduct() {
-            const n = document.getElementById('new-name'), p = document.getElementById('new-price');
-            if(n.value && p.value) {
-                state.products.push({id: Date.now(), name: n.value, price: parseFloat(p.value)});
-                n.value = ''; p.value = ''; save(); render();
-            }
+            const n = document.getElementById('new-name');
+            const p = document.getElementById('new-price');
+            if(!n.value || !p.value) return;
+            state.products.push({ id: Date.now(), name: n.value, price: parseFloat(p.value) });
+            n.value = ''; p.value = '';
+            save();
         }
 
         function removeProduct(id) {
-            state.products = state.products.filter(p => p.id !== id);
-            save(); render();
+            state.products = state.products.filter(x => x.id !== id);
+            save();
         }
 
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
+        function openModal(id) { document.getElementById(id).classList.add('active'); document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); document.getElementById(id).classList.add('hidden'); }
 
-        window.onload = load;
+        function render() {
+            document.getElementById('main-balance').innerText = `$ ${state.balance.toLocaleString()}`;
+            
+            const grid = document.getElementById('pos-grid');
+            grid.innerHTML = state.products.map(p => `
+                <button onclick="addToCart(${p.id})" class="glass p-5 rounded-[1.8rem] flex flex-col text-left active:scale-95 transition-transform">
+                    <span class="text-[9px] font-black text-slate-500 uppercase mb-1 truncate">${p.name}</span>
+                    <span class="text-lg font-bold text-white">$ ${p.price.toLocaleString()}</span>
+                </button>
+            `).join('');
+
+            const cartEl = document.getElementById('cart-items');
+            cartEl.innerHTML = cart.map(i => `
+                <div class="flex justify-between items-center text-slate-300">
+                    <span>${i.qty}x ${i.name}</span>
+                    <span class="font-bold text-cyan-400">$ ${(i.qty*i.price).toLocaleString()}</span>
+                </div>
+            `).join('');
+            
+            document.getElementById('cart-total').innerText = `$ ${getCartTotal().toLocaleString()}`;
+
+            const histEl = document.getElementById('history-log');
+            histEl.innerHTML = state.history.slice(-10).reverse().map(h => `
+                <div class="glass p-4 rounded-2xl flex justify-between items-center">
+                    <div class="truncate pr-4">
+                        <p class="text-[8px] text-slate-500 uppercase font-black">${h.date}</p>
+                        <p class="text-xs text-white truncate">${h.desc}</p>
+                    </div>
+                    <span class="font-bold ${h.amount < 0 ? 'text-rose-400' : 'text-emerald-400'} whitespace-nowrap">
+                        ${h.amount === 0 ? 'TC' : '$ ' + Math.abs(h.amount).toLocaleString()}
+                    </span>
+                </div>
+            `).join('');
+
+            const fixedEl = document.getElementById('fixed-list');
+            fixedEl.innerHTML = state.fixed.map(fe => `
+                <div class="glass p-5 rounded-3xl flex justify-between items-center border-l-4 border-l-cyan-500">
+                    <div class="truncate pr-4">
+                        <p class="text-sm font-bold text-white">${fe.name}</p>
+                        <p class="text-xs text-cyan-400 font-black">$ ${fe.amount.toLocaleString()}</p>
+                    </div>
+                    <button onclick="payFixed(${fe.id})" class="bg-white text-slate-900 px-5 py-2 rounded-xl text-[10px] font-black uppercase whitespace-nowrap">Pagar</button>
+                </div>
+            `).join('');
+
+            const invEl = document.getElementById('full-inventory');
+            invEl.innerHTML = state.products.map(p => `
+                <div class="flex justify-between p-4 bg-slate-900/50 rounded-xl items-center">
+                    <span class="text-xs font-bold">${p.name} ($${p.price})</span>
+                    <button onclick="removeProduct(${p.id})" class="text-rose-500 font-bold px-2">✕</button>
+                </div>
+            `).join('');
+        }
+
+        // Init cuotas
+        const sel = document.getElementById('installments');
+        [1,2,3,6,12,18,24].forEach(i => {
+            const o = document.createElement('option'); o.value = i; o.textContent = `${i} Pago${i>1?'s':''}`;
+            sel.appendChild(o);
+        });
+
+        window.onload = render;
     </script>
 </body>
 </html>
